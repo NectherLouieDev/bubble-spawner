@@ -1,0 +1,147 @@
+[gd_scene format=3 uid="uid://bpk4wqwdu1d0e"]
+
+[ext_resource type="Script" uid="uid://bs5lgvv2rvc0n" path="res://scripts/main.gd" id="1_0wfyh"]
+[ext_resource type="PackedScene" uid="uid://b450r5pt3h0w2" path="res://game_objects/player/player.tscn" id="1_o5qli"]
+[ext_resource type="Script" uid="uid://cfew6ijt3x488" path="res://game_objects/ball/ball_spawner.gd" id="3_sugp2"]
+[ext_resource type="Script" uid="uid://cvoq144bm1txk" path="res://scripts/debug_panel.gd" id="4_jyhfs"]
+[ext_resource type="Script" uid="uid://cmdjhqtredllp" path="res://scripts/debug_menu.gd" id="4_tbgi4"]
+
+[sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_oc2dr"]
+
+[sub_resource type="LabelSettings" id="LabelSettings_sugp2"]
+
+[sub_resource type="Gradient" id="Gradient_jyhfs"]
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_oc2dr"]
+gradient = SubResource("Gradient_jyhfs")
+
+[sub_resource type="Gradient" id="Gradient_tbgi4"]
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_tbgi4"]
+gradient = SubResource("Gradient_tbgi4")
+
+[node name="Main" type="Node2D" unique_id=491353220]
+script = ExtResource("1_0wfyh")
+
+[node name="Ground" type="StaticBody2D" parent="." unique_id=1185583609]
+position = Vector2(0, 217)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=2006089813]
+shape = SubResource("WorldBoundaryShape2D_oc2dr")
+
+[node name="Ground2" type="StaticBody2D" parent="." unique_id=1558067107]
+position = Vector2(0, -216)
+rotation = 3.1415927
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground2" unique_id=1588484517]
+shape = SubResource("WorldBoundaryShape2D_oc2dr")
+
+[node name="Ground3" type="StaticBody2D" parent="." unique_id=1978935886]
+position = Vector2(384, 0)
+rotation = 4.712389
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground3" unique_id=1933029215]
+shape = SubResource("WorldBoundaryShape2D_oc2dr")
+
+[node name="Ground4" type="StaticBody2D" parent="." unique_id=1839127931]
+position = Vector2(-385, 0)
+rotation = 1.5707964
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground4" unique_id=2071779326]
+shape = SubResource("WorldBoundaryShape2D_oc2dr")
+
+[node name="SpawnPoints" type="Node2D" parent="." unique_id=586458955]
+
+[node name="BallSpawnPoint1" type="Marker2D" parent="SpawnPoints" unique_id=218622256]
+position = Vector2(-200, -85)
+
+[node name="BallSpawnPoint2" type="Marker2D" parent="SpawnPoints" unique_id=1846965574]
+position = Vector2(0, -85)
+
+[node name="BallSpawnPoint3" type="Marker2D" parent="SpawnPoints" unique_id=854086808]
+position = Vector2(200, -86)
+
+[node name="PlayerSpawnPoint" type="Marker2D" parent="SpawnPoints" unique_id=680620032]
+position = Vector2(0, 199)
+
+[node name="Player" parent="." unique_id=1121672026 instance=ExtResource("1_o5qli")]
+position = Vector2(0, 199)
+
+[node name="BallSpawner" type="Node2D" parent="." unique_id=1629696432]
+script = ExtResource("3_sugp2")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=806755075]
+zoom = Vector2(1.5, 1.5)
+
+[node name="CanvasHUD" type="CanvasLayer" parent="." unique_id=1607555624]
+
+[node name="ScoreHUD" type="HBoxContainer" parent="CanvasHUD" unique_id=1251106011]
+custom_minimum_size = Vector2(512, 32)
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_left = -448.0
+offset_right = 576.0
+offset_bottom = 32.0
+grow_horizontal = 2
+alignment = 1
+
+[node name="LivesLabel" type="Label" parent="CanvasHUD/ScoreHUD" unique_id=80338209]
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
+text = "LIVES:"
+
+[node name="ScoreLabel" type="Label" parent="CanvasHUD/ScoreHUD" unique_id=1695405962]
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
+text = "SCORE:"
+
+[node name="StartContainer" type="CenterContainer" parent="CanvasHUD" unique_id=4378060]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Label" type="Label" parent="CanvasHUD/StartContainer" unique_id=822654034]
+layout_mode = 2
+text = "press [SPACE] to start"
+label_settings = SubResource("LabelSettings_sugp2")
+horizontal_alignment = 1
+vertical_alignment = 1
+autowrap_trim_flags = 128
+
+[node name="DebugMenu" type="MenuButton" parent="CanvasHUD" unique_id=19460072]
+offset_right = 63.0
+offset_bottom = 40.0
+text = "DEBUG"
+switch_on_hover = true
+item_count = 2
+popup/item_0/text = "Colors"
+popup/item_0/icon = SubResource("GradientTexture2D_oc2dr")
+popup/item_0/checkable = 2
+popup/item_0/checked = true
+popup/item_0/id = 0
+popup/item_1/text = "Tweens"
+popup/item_1/icon = SubResource("GradientTexture2D_tbgi4")
+popup/item_1/checkable = 2
+popup/item_1/id = 1
+script = ExtResource("4_tbgi4")
+
+[node name="DebugPanel" type="PanelContainer" parent="CanvasHUD" unique_id=712161692]
+visible = false
+offset_right = 40.0
+offset_bottom = 40.0
+script = ExtResource("4_jyhfs")
+
+[node name="VBoxContainer" type="VBoxContainer" parent="CanvasHUD/DebugPanel" unique_id=702234789]
+custom_minimum_size = Vector2(256, 0)
+layout_mode = 2
+
+[node name="TitleLabel" type="Label" parent="CanvasHUD/DebugPanel/VBoxContainer" unique_id=1372172855]
+layout_mode = 2
+text = "DEBUG"
+
+[node name="ColorToggle" type="CheckButton" parent="CanvasHUD/DebugPanel/VBoxContainer" unique_id=1923200174]
+layout_mode = 2
+text = "Colors"

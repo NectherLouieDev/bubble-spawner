@@ -1,0 +1,27 @@
+[gd_scene format=3 uid="uid://ya7txhuo63qe"]
+
+[ext_resource type="Script" uid="uid://blj4a2ph10erc" path="res://game_objects/projectile/projectile.gd" id="1_xubry"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_oc2dr"]
+size = Vector2(10, 10)
+
+[node name="Projectile" type="Area2D" unique_id=1201594996]
+collision_layer = 8
+collision_mask = 4
+script = ExtResource("1_xubry")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1070316458]
+custom_minimum_size = Vector2(10, 10)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1010099041]
+shape = SubResource("RectangleShape2D_oc2dr")
+
+[node name="DestroyTimer" type="Timer" parent="." unique_id=1722228080]
+wait_time = 1.5
+one_shot = true
+autostart = true

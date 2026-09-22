@@ -1,0 +1,45 @@
+[gd_scene format=3 uid="uid://b450r5pt3h0w2"]
+
+[ext_resource type="Script" uid="uid://cov2wh8rcs275" path="res://game_objects/player/player.gd" id="1_l3qw1"]
+[ext_resource type="PackedScene" uid="uid://ya7txhuo63qe" path="res://game_objects/projectile/projectile.tscn" id="2_jcgnw"]
+[ext_resource type="Script" uid="uid://dknua4831kvi7" path="res://scripts/components/color_toggle.gd" id="3_gnf7o"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_oc2dr"]
+size = Vector2(32, 32)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_jcgnw"]
+size = Vector2(36, 36)
+
+[node name="Player" type="CharacterBody2D" unique_id=1121672026]
+collision_layer = 2
+script = ExtResource("1_l3qw1")
+projectile_scene = ExtResource("2_jcgnw")
+
+[node name="ColorRect" type="ColorRect" parent="." unique_id=1291638911]
+custom_minimum_size = Vector2(32, 32)
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=880476154]
+shape = SubResource("RectangleShape2D_oc2dr")
+
+[node name="ShootPoint" type="Marker2D" parent="." unique_id=175308845]
+position = Vector2(0, -20)
+
+[node name="InvulnerableTimer" type="Timer" parent="." unique_id=1397733606]
+wait_time = 1.5
+one_shot = true
+
+[node name="HurtBox" type="Area2D" parent="." unique_id=391872068]
+collision_layer = 16
+collision_mask = 4
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="HurtBox" unique_id=650691067]
+shape = SubResource("RectangleShape2D_jcgnw")
+debug_color = Color(0.8125812, 0.39093813, 0.34060904, 0.41960785)
+
+[node name="ColorToggle" type="Node" parent="." unique_id=773235541]
+script = ExtResource("3_gnf7o")
