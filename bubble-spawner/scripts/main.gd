@@ -17,6 +17,8 @@ const BALL_SPAWNS: Array[Dictionary] = [
 @onready var lives_label: Label = $CanvasHUD/ScoreHUD/LivesLabel
 @onready var score_label: Label = $CanvasHUD/ScoreHUD/ScoreLabel
 @onready var start_prompt: CenterContainer = $CanvasHUD/StartContainer
+@onready var start_timer: Timer = $StartTimer
+@onready var start_time_label: Label = $CanvasHUD/OverlayContainer/StartTimeLabel
 
 @onready var debug_panel: DebugPanel = $CanvasHUD/DebugPanel
 @onready var debug_menu: DebugMenu = $CanvasHUD/DebugMenu
@@ -31,7 +33,10 @@ func _ready() -> void:
 	# Connect player
 	player.died.connect(_on_player_died)
 	
-	# Connect check buttons
+	# Timer connects
+	start_timer.timeout.connect(on_start_timer_completed)
+	
+	# Connect debugs
 	#debug_panel.toggle_changed.connect(_on_debug_toggle_changed)
 	debug_menu.toggle_changed.connect(_on_debug_toggle_changed)
 
@@ -62,12 +67,25 @@ func _enter_spawn_in() -> void:
 	_freeze_physics(true)
 	_set_player_input(false)
 	start_prompt.visible = true
+	start_time_label.visible = false;
 
 func _enter_start() -> void:
 	start_prompt.visible = false
+	start_time_label.visible = true;
+	
 	_spawn_all()
 	_freeze_physics(true)
 	_set_player_input(false)
+	
+	start_timer.start()
+
+var count = 3;
+func on_start_timer_completed() -> void:
+	start_time_label.text = str(count)
+	count -= 1
+	#start_time_label.visible = false;
+	#_freeze_physics(false)
+	#_set_player_input(true)
 
 func get_toggle_value(toggle_name: String) -> bool:
 	return debug_menu.toggles_value[toggle_name] or false
@@ -79,6 +97,10 @@ func _unhandled_input(event: InputEvent) -> void:
 		if event.is_action_pressed("jump"):  # Space
 			GameManager.set_state(GameManager.State.START)
 
+# --- Updates ---
+#func _process(delta):
+	#start_time_label.text = str(int(start_timer.time_left))
+	
 # --- Spawn helpers ---
 
 func _clear_all() -> void:
