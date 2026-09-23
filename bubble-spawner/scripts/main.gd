@@ -23,6 +23,13 @@ const BALL_SPAWNS: Array[Dictionary] = [
 @onready var debug_panel: DebugPanel = $CanvasHUD/DebugPanel
 @onready var debug_menu: DebugMenu = $CanvasHUD/DebugMenu
 
+@export var color_on = false
+@export var pop_intro_delay: bool = false
+@export var count_pop: bool = false
+@export var ball_stretch: bool = false
+
+@export var proj_trail: bool = false
+
 func _ready() -> void:
 	# Connect GameManager
 	GameManager.lives_changed.connect(_on_lives_changed)
@@ -48,13 +55,23 @@ func _on_debug_toggle_changed(toggle_name: String, value: bool) -> void:
 	match toggle_name:
 		"all_colors":
 			player.color_on = value
-			
-			for b in balls:
-				b.color_on = value
+			color_on = value
 		"pop_intro":
 			player.pop_intro = value
 			for b in balls:
 				b.pop_intro = value
+		"pop_intro_delay":
+			pop_intro_delay = value
+		"count_pop":
+			count_pop = value
+		"player_stretch":
+			player.player_stretch = value
+		"ball_stretch":
+			ball_stretch = value
+		"proj_wobble":
+			player.proj_wobble = value
+		"proj_trail":
+			proj_trail = value
 		_:
 			push_warning("Unknown debug toggle: %s" % toggle_name)
 
@@ -81,11 +98,22 @@ func _enter_start() -> void:
 
 var count = 3;
 func on_start_timer_completed() -> void:
-	start_time_label.text = str(count)
 	count -= 1
-	#start_time_label.visible = false;
-	#_freeze_physics(false)
-	#_set_player_input(true)
+	start_time_label.text = str(count)
+	
+	if count_pop: 
+		start_time_label.pivot_offset = start_time_label.size * 0.5
+		start_time_label.scale = Vector2.ZERO
+		
+		var tw := create_tween()
+		tw.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+		tw.tween_property(start_time_label, "scale", Vector2.ONE, 0.25)
+	
+	if count <= 0:
+		start_timer.stop()
+		start_time_label.visible = false;
+		_freeze_physics(false)
+		_set_player_input(true)
 
 func get_toggle_value(toggle_name: String) -> bool:
 	return debug_menu.toggles_value[toggle_name] or false
@@ -112,7 +140,7 @@ func _spawn_all() -> void:
 	var player_spawn: Marker2D = spawn_points.get_node("PlayerSpawnPoint")
 	player.global_position = player_spawn.global_position
 	player.pop_intro = get_toggle_value("pop_intro")
-	player.play_pop_intro(0)
+	player.play_pop_intro(0 if pop_intro_delay else 0)
 	player.velocity = Vector2.ZERO
 
 	# Balls at configured markers
@@ -121,6 +149,9 @@ func _spawn_all() -> void:
 		var marker: Marker2D = spawn_points.get_node(entry["marker"])
 		# Spawn a ball
 		var ball = spawner.spawn_ball_at(marker.global_position, entry["size"])
+		ball.color_on = color_on
+		ball.ball_stretch = ball_stretch
+		ball.proj_trail = proj_trail
 		ball.popped.connect(on_ball_popped)
 		balls.append(ball)
 	
@@ -128,7 +159,7 @@ func _spawn_all() -> void:
 		var ball = balls[i]
 		ball.pop_intro = get_toggle_value("pop_intro")
 		var delay = (i + 1) * 0.15
-		ball.play_pop_intro(delay)
+		ball.play_pop_intro(delay if pop_intro_delay else 0)
 	
 	print("before ", balls.size())
 

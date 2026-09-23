@@ -7,7 +7,18 @@ signal toggle_changed(toggle_name: String, value: bool)
 const TOGGLES := {
 	0: "all_colors",
 	1: "pop_intro",
-	# 2: "show_hitboxes",
+	2: "pop_intro_delay",
+	3: "count_pop",
+	4: "player_stretch",
+	5: "ball_stretch",
+	6: "proj_wobble",
+	7: "proj_trail",
+	8: "hit_particles",
+	9: "ui_count",
+	10: "sfx_on",
+	11: "bgm_on",
+	12: "camera_shake_on",
+	13: "ui_meta"
 }
 
 var toggles_value := {

@@ -31,8 +31,15 @@ var base_color := Color(0.278, 0.596, 0.294, 1.0)
 		pop_intro = value
 		if value:
 			color_rect.scale = Vector2.ZERO
+		else:
+			color_rect.scale = Vector2.ONE
 		
 @export var pop_intro_duration := 0.25
+@export var player_stretch = false
+
+@export var proj_wobble := false:
+	set(value):
+		proj_wobble = value
 
 func _ready() -> void:
 	invuln_timer.timeout.connect(_on_invuln_end)
@@ -45,7 +52,8 @@ func _on_hurt(body: Node2D) -> void:
 	# Only react to balls (in case HurtBox ever overlaps something else)
 	if body is Ball:
 		take_hit()
-	
+
+var _last_dir := 0
 func _physics_process(delta: float) -> void:
 	# Gravity
 	if not is_on_floor():
@@ -55,6 +63,11 @@ func _physics_process(delta: float) -> void:
 		# Horizontal input
 		var dir := Input.get_axis("move_left", "move_right")
 		velocity.x = dir * speed
+		
+		if sign(dir) != _last_dir and dir != 0:
+			#tween_squeeze()
+			tween_stretch()
+		_last_dir = sign(dir)
 
 		# Jump
 		#if Input.is_action_just_pressed("jump") and is_on_floor():
@@ -74,6 +87,7 @@ func shoot() -> void:
 	var proj:Projectile = projectile_scene.instantiate()
 	proj.global_position = shoot_point.global_position
 	proj.color_on = color_on
+	proj.proj_wobble = proj_wobble
 	refresh_color()
 	get_tree().current_scene.add_child(proj)
 
@@ -124,3 +138,37 @@ func _play_pop_intro(delay: float) -> void:
 		# (Main will overwrite this anyway via _set_player_input)
 		pass
 	)
+
+func tween_squeeze() -> void:
+	if not player_stretch:
+		return
+		
+	var cr := color_rect
+
+	# Pivot at the visual's center so the squash reads symmetrically
+	cr.pivot_offset = cr.size * 0.5
+
+	# Direction-aware squash: wide + short when moving horizontally
+	var squash := Vector2(1.25, 0.75)
+
+	var tw := create_tween()
+	tw.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	# Squash in
+	tw.tween_property(cr, "scale", squash, 0.08)
+	# Snap back to normal
+	tw.tween_property(cr, "scale", Vector2.ONE, 0.12)
+
+func tween_stretch() -> void:
+	if not player_stretch:
+		return
+		
+	var cr := color_rect
+	cr.pivot_offset = cr.size * 0.5
+	var dir = sign(velocity.x)
+	var stretch := Vector2(1.0 + 0.5 * abs(dir), 1.0 - 0.1 * abs(dir))
+	
+	var tw := create_tween()
+	tw.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	tw.tween_property(cr, "scale", stretch, 0.08 * 5)
+	tw.tween_property(cr, "scale", Vector2.ONE, 0.12 * 2)

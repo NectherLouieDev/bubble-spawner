@@ -1,12 +1,33 @@
 [gd_scene format=3 uid="uid://cyy4p36kfp0ic"]
 
 [ext_resource type="Script" uid="uid://dcgq8xq1ijy0q" path="res://game_objects/ball/ball.gd" id="1_oggn1"]
+[ext_resource type="Script" uid="uid://dgffexuhni3q5" path="res://game_objects/ball/ball_visual.gd" id="2_fvkfu"]
+[ext_resource type="Script" uid="uid://c855jte1v7pbf" path="res://game_objects/ball/ball_trail.gd" id="3_o70nm"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_oc2dr"]
+
+[sub_resource type="Gradient" id="Gradient_o70nm"]
+offsets = PackedFloat32Array(0, 0.4413793, 1)
+colors = PackedColorArray(1, 0.48452926, 0.48452926, 1, 1, 0.52508664, 0.53412783, 1, 0.48452926, 0.9063318, 1, 0)
 
 [node name="Ball" type="CharacterBody2D" unique_id=1125015307]
 collision_layer = 4
 script = ExtResource("1_oggn1")
 
+[node name="Visual" type="Node2D" parent="." unique_id=999120387]
+script = ExtResource("2_fvkfu")
+
 [node name="CollisionShape2D" type="CollisionShape2D" parent="." unique_id=1325946901]
 shape = SubResource("CircleShape2D_oc2dr")
+
+[node name="BallTrail" type="Line2D" parent="." unique_id=1307428342]
+z_index = -1
+width = 40.0
+default_color = Color(0.48452926, 0.9063318, 1, 0.70000005)
+gradient = SubResource("Gradient_o70nm")
+joint_mode = 2
+begin_cap_mode = 2
+end_cap_mode = 2
+antialiased = true
+script = ExtResource("3_o70nm")
+min_distance = 4.0
