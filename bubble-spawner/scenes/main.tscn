@@ -4,6 +4,17 @@
 [ext_resource type="PackedScene" uid="uid://b450r5pt3h0w2" path="res://game_objects/player/player.tscn" id="1_o5qli"]
 [ext_resource type="Script" uid="uid://cfew6ijt3x488" path="res://game_objects/ball/ball_spawner.gd" id="3_sugp2"]
 [ext_resource type="Script" uid="uid://cmdjhqtredllp" path="res://scripts/debug_menu.gd" id="4_tbgi4"]
+[ext_resource type="Script" uid="uid://dltg8xlo8opu8" path="res://scenes/shake_camera_2d.gd" id="4_tefeu"]
+
+[sub_resource type="Gradient" id="Gradient_tefeu"]
+offsets = PackedFloat32Array(0, 0.18360655, 0.8360656, 1)
+colors = PackedColorArray(0.3229548, 0.45435512, 0.7957703, 1, 0.03265197, 0.052177668, 0.2124908, 1, 0.041759722, 0.06623007, 0.23399998, 1, 0.43262556, 0.5614322, 0.87304795, 1)
+
+[sub_resource type="GradientTexture2D" id="GradientTexture2D_tefeu"]
+gradient = SubResource("Gradient_tefeu")
+width = 1024
+height = 768
+fill_to = Vector2(0, 1)
 
 [sub_resource type="WorldBoundaryShape2D" id="WorldBoundaryShape2D_oc2dr"]
 
@@ -24,8 +35,24 @@ font_size = 128
 outline_size = 8
 outline_color = Color(0, 0, 0, 1)
 
+[sub_resource type="AudioStreamOggVorbis" id="AudioStreamOggVorbis_tbgi4"]
+
+[sub_resource type="AudioStreamOggVorbis" id="AudioStreamOggVorbis_o6xl0"]
+
+[sub_resource type="AudioStreamOggVorbis" id="AudioStreamOggVorbis_tipki"]
+
+[sub_resource type="AudioStreamOggVorbis" id="AudioStreamOggVorbis_tefeu"]
+
+[sub_resource type="AudioStreamMP3" id="AudioStreamMP3_tbgi4"]
+loop = true
+
 [node name="Main" type="Node2D" unique_id=491353220]
 script = ExtResource("1_0wfyh")
+
+[node name="Background" type="Sprite2D" parent="." unique_id=687769418]
+z_index = -20
+z_as_relative = false
+texture = SubResource("GradientTexture2D_tefeu")
 
 [node name="Ground" type="StaticBody2D" parent="." unique_id=1185583609]
 position = Vector2(0, 217)
@@ -74,8 +101,9 @@ position = Vector2(0, 199)
 [node name="BallSpawner" type="Node2D" parent="." unique_id=1629696432]
 script = ExtResource("3_sugp2")
 
-[node name="Camera2D" type="Camera2D" parent="." unique_id=806755075]
+[node name="ShakeCamera2D" type="Camera2D" parent="." unique_id=806755075]
 zoom = Vector2(1.5, 1.5)
+script = ExtResource("4_tefeu")
 
 [node name="CanvasHUD" type="CanvasLayer" parent="." unique_id=1607555624]
 
@@ -148,3 +176,20 @@ horizontal_alignment = 1
 vertical_alignment = 1
 
 [node name="StartTimer" type="Timer" parent="." unique_id=339641202]
+
+[node name="Audio" type="Node2D" parent="." unique_id=927351768]
+
+[node name="AudioStreamPlayer2D1" type="AudioStreamPlayer2D" parent="Audio" unique_id=1232589715]
+stream = SubResource("AudioStreamOggVorbis_tbgi4")
+
+[node name="AudioStreamPlayer2D2" type="AudioStreamPlayer2D" parent="Audio" unique_id=790024312]
+stream = SubResource("AudioStreamOggVorbis_o6xl0")
+
+[node name="AudioStreamPlayer2D3" type="AudioStreamPlayer2D" parent="Audio" unique_id=1080270985]
+stream = SubResource("AudioStreamOggVorbis_tipki")
+
+[node name="AudioStreamPlayer2D4" type="AudioStreamPlayer2D" parent="Audio" unique_id=665686821]
+stream = SubResource("AudioStreamOggVorbis_tefeu")
+
+[node name="AudioStreamPlayer2DBGM" type="AudioStreamPlayer2D" parent="Audio" unique_id=741975890]
+stream = SubResource("AudioStreamMP3_tbgi4")

@@ -1,0 +1,29 @@
+[gd_scene format=3 uid="uid://bxmdy36jsk50l"]
+
+[ext_resource type="Script" uid="uid://c7e71qdaxjkdo" path="res://game_objects/vfx/hit_particles.gd" id="1_ayfae"]
+
+[sub_resource type="ParticleProcessMaterial" id="ParticleProcessMaterial_ayfae"]
+particle_flag_disable_z = true
+direction = Vector3(0, -1, 0)
+spread = 180.0
+initial_velocity_min = 160.0
+initial_velocity_max = 360.0
+angular_velocity_min = -180.00002
+angular_velocity_max = 179.99998
+gravity = Vector3(0, 300, 0)
+scale_min = 4.0
+scale_max = 8.0
+
+[node name="HitParticle" type="Node2D" unique_id=1828013108]
+z_index = 1
+script = ExtResource("1_ayfae")
+
+[node name="Particles" type="GPUParticles2D" parent="." unique_id=1628354960]
+z_index = 1
+emitting = false
+amount = 12
+lifetime = 0.5
+one_shot = true
+explosiveness = 1.0
+local_coords = true
+process_material = SubResource("ParticleProcessMaterial_ayfae")

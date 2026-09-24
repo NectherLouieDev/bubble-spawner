@@ -31,3 +31,7 @@ end_cap_mode = 2
 antialiased = true
 script = ExtResource("3_o70nm")
 min_distance = 4.0
+
+[node name="AudioWallHit" type="AudioStreamPlayer2D" parent="." unique_id=1253165393]
+
+[node name="AudioSplode" type="AudioStreamPlayer2D" parent="." unique_id=544231901]

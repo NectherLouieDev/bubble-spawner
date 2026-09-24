@@ -7,6 +7,7 @@ extends CharacterBody2D
 @export var color := Color(0.2, 0.8, 1.0)
 
 signal popped(body: Ball)
+signal wall_collision_signal
 
 var frozen := false
 
@@ -48,6 +49,7 @@ var _scale_tween: Tween        # owns visual.scale exclusively
 var _wobbling := false         # true while a collision wobble is playing
 
 @export var proj_trail := false
+@export var sfx_on := false
  
 func _ready() -> void:
 	$CollisionShape2D.shape.radius = size
@@ -105,6 +107,8 @@ func _physics_process(delta: float) -> void:
 	var collision := move_and_collide(velocity * delta)
 	if collision:
 		velocity = velocity.bounce(collision.get_normal())
+		#wall_collision_signal.emit()
+		_on_wall_hit_sound()
 		if collision_wobble:
 			_kick_collision_wobble()
 		# Re-face after bounce, since velocity flipped.
@@ -196,6 +200,7 @@ func spawn_child() -> Ball:
 	child.ball_stretch = ball_stretch
 	child.pop_intro = pop_intro
 	child.proj_trail = proj_trail
+	child.sfx_on = sfx_on
 
 	return child
 
@@ -206,3 +211,15 @@ func refresh_color() -> void:
 
 func get_base_color() -> Color:
 	return base_color if color_on else white_color
+
+const HIT_SOUNDS := [
+	preload("res://audio/impactPlank_medium_000.ogg"),
+	preload("res://audio/impactPlank_medium_001.ogg"),
+	preload("res://audio/impactPlank_medium_002.ogg"),
+	preload("res://audio/impactPlank_medium_003.ogg")
+]
+func _on_wall_hit_sound() -> void:
+	if sfx_on:
+		var p := $AudioWallHit
+		p.stream = HIT_SOUNDS.pick_random()
+		p.play()

@@ -29,6 +29,11 @@ const BALL_SPAWNS: Array[Dictionary] = [
 @export var ball_stretch: bool = false
 
 @export var proj_trail: bool = false
+@export var hit_particles: bool = false
+@export var ui_count: bool = false
+@export var sfx_on: bool = false
+@export var bgm_on: bool = false
+@export var camera_shake: bool = false
 
 func _ready() -> void:
 	# Connect GameManager
@@ -38,6 +43,7 @@ func _ready() -> void:
 	GameManager.game_over.connect(_on_game_over)
 
 	# Connect player
+	player.shoot_signal.connect(_on_player_shoot)
 	player.died.connect(_on_player_died)
 	
 	# Timer connects
@@ -49,6 +55,7 @@ func _ready() -> void:
 
 	# Initialize
 	GameManager.reset()
+	color_on = false
 	_enter_spawn_in()
 
 func _on_debug_toggle_changed(toggle_name: String, value: bool) -> void:
@@ -72,12 +79,22 @@ func _on_debug_toggle_changed(toggle_name: String, value: bool) -> void:
 			player.proj_wobble = value
 		"proj_trail":
 			proj_trail = value
+		"hit_particles":
+			hit_particles = value
+		"ui_count":
+			ui_count = value
+		"sfx_on":
+			sfx_on = value
+		"bgm_on":
+			bgm_on = value
+		"camera_shake_on":
+			camera_shake = value
 		_:
 			push_warning("Unknown debug toggle: %s" % toggle_name)
 
 
 # --- State entry ---
-
+const BGM_SOUND = preload("res://audio/bgm.mp3")
 func _enter_spawn_in() -> void:
 	_clear_all()
 	#_spawn_all()
@@ -89,6 +106,12 @@ func _enter_spawn_in() -> void:
 func _enter_start() -> void:
 	start_prompt.visible = false
 	start_time_label.visible = true;
+	
+	if bgm_on:
+		var p := $Audio/AudioStreamPlayer2DBGM
+		p.stream = BGM_SOUND
+		p.volume_linear = 0.35
+		p.play()
 	
 	_spawn_all()
 	_freeze_physics(true)
@@ -152,6 +175,7 @@ func _spawn_all() -> void:
 		ball.color_on = color_on
 		ball.ball_stretch = ball_stretch
 		ball.proj_trail = proj_trail
+		ball.sfx_on = sfx_on
 		ball.popped.connect(on_ball_popped)
 		balls.append(ball)
 	
@@ -163,8 +187,18 @@ func _spawn_all() -> void:
 	
 	print("before ", balls.size())
 
+const HIT_SOUND = preload("res://audio/explosionCrunch_000.ogg")
 func on_ball_popped(body: Ball) -> void:
 	body.popped.disconnect(on_ball_popped)
+	
+	if sfx_on:
+		var p := $Audio/AudioStreamPlayer2D3
+		p.stream = HIT_SOUND
+		p.volume_linear = 1
+		p.play()
+	
+	shake_camera(1.5)
+	spawn_hit_particles(body.global_position, Color.ORANGE_RED, 8)
 	
 	GameManager.add_score(floor(body.size * 10))
 	
@@ -174,6 +208,7 @@ func on_ball_popped(body: Ball) -> void:
 			var ball_child = body.spawn_child()
 			ball_child.popped.connect(on_ball_popped)
 			ball_child.play_pop_intro(0)
+			ball_child._kick_collision_wobble()
 			balls.append(ball_child)
 	
 	balls.remove_at(ballIndex)
@@ -195,15 +230,112 @@ func _set_player_input(enabled: bool) -> void:
 
 # --- Signal handlers ---
 
+const SHOOT_SOUNDS := [
+	preload("res://audio/laserSmall_000.ogg"),
+	preload("res://audio/laserSmall_001.ogg"),
+	preload("res://audio/laserSmall_002.ogg"),
+	preload("res://audio/laserSmall_003.ogg")
+]
+const SPLODE_SOUND := preload("res://audio/impactPunch_medium_000.ogg")
+
+func _on_player_shoot() -> void:
+	if sfx_on:
+		var p := $Audio/AudioStreamPlayer2D1
+		p.stream = SHOOT_SOUNDS.pick_random()
+		p.play()
+
 func _on_player_died() -> void:
+	
+	if sfx_on:
+		var p := $Audio/AudioStreamPlayer2D2
+		p.stream = SPLODE_SOUND
+		p.volume_db = 2.0
+		p.play()
+	
+	shake_camera(5)
+	spawn_hit_particles(player.global_position, Color.CADET_BLUE)
 	if GameManager.state == GameManager.State.START:
 		GameManager.lose_life()
 
 func _on_lives_changed(new_lives: int) -> void:
 	lives_label.text = "Lives: %d" % new_lives
 
+
+var _displayed_score := 0
+var _score_tween: Tween
+var _scale_tween: Tween
+
+const SCALE_POP := 1.25     # how big while rolling
+const SCALE_POP_TIME := 0.1 # time to reach pop size
+const SCALE_SETTLE_TIME := 0.25
+
 func _on_score_changed(new_score: int) -> void:
-	score_label.text = "Score: %d" % new_score
+	if ui_count:
+		count_up_score(new_score)
+	else:
+		_set_displayed_score(new_score)
+
+func count_up_score(new_score: int) -> void:
+	if new_score == _displayed_score:
+		return
+		
+	# --- Count-up tween ---
+	if _score_tween and _score_tween.is_valid():
+		_score_tween.kill()
+
+	var gap = abs(new_score - _displayed_score)
+	var duration := clampf(gap / 200.0, 0.15, 0.6)
+
+	_score_tween = create_tween()
+	_score_tween.set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	_score_tween.tween_method(_set_displayed_score, _displayed_score, new_score, duration)
+	_score_tween.finished.connect(_on_score_tween_finished)
+
+	# --- Scale pop tween ---
+	# Pivot at center so it grows from the middle
+	score_label.pivot_offset = score_label.size * 0.5
+
+	# Cancel any settle-back that was queued
+	if _scale_tween and _scale_tween.is_valid():
+		_scale_tween.kill()
+
+	_scale_tween = create_tween()
+	_scale_tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+
+	# Only scale UP if we're not already at full pop size.
+	# If the label is mid-settle (currently < SCALE_POP), jump it back up.
+	if score_label.scale.x < SCALE_POP:
+		_scale_tween.tween_property(score_label, "scale", Vector2.ONE * SCALE_POP, SCALE_POP_TIME)
+
+	# Hold at pop size while the count runs, then settle back.
+	# We DON'T schedule the settle here — the count tween's `finished`
+	# callback triggers it, so stacking counts extends the hold naturally.
+	_scale_tween.tween_callback(_queue_settle_scale) \
+		.set_delay(duration + 0.01)
+
+func _set_displayed_score(value: int) -> void:
+	_displayed_score = value
+	score_label.text = "Score: %d" % _displayed_score
+
+func _on_score_tween_finished() -> void:
+	# Small grace period so a rapid follow-up pop can re-kick before settling.
+	await get_tree().create_timer(0.05).timeout
+	# If nothing new kicked in, settle back to 1.0.
+	if _score_tween and _score_tween.is_running():
+		return
+	_settle_scale()
+
+func _queue_settle_scale() -> void:
+	# Wrapper so we can call it from a tween callback
+	_settle_scale()
+
+func _settle_scale() -> void:
+	if _scale_tween and _scale_tween.is_valid():
+		_scale_tween.kill()
+
+	_scale_tween = create_tween()
+	_scale_tween.set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	_scale_tween.tween_property(score_label, "scale", Vector2.ONE, SCALE_SETTLE_TIME)
 
 func _on_state_changed(new_state: GameManager.State) -> void:
 	match new_state:
@@ -218,3 +350,23 @@ func _on_game_over() -> void:
 	get_tree().paused = true
 	lives_label.text = "GAME OVER"
 	start_prompt.visible = false
+
+const HIT_PARTICLES := preload("res://game_objects/vfx/hit_particles.tscn")
+
+func spawn_hit_particles(pos: Vector2, color: Color, amount: int = 12) -> void:
+	if not hit_particles:
+		return
+	
+	var hp := HIT_PARTICLES.instantiate()
+	hp.configure(color, amount)
+	hp.global_position = pos
+	add_child(hp)
+
+
+@onready var camera: ShakeCamera2D = $ShakeCamera2D
+
+func shake_camera(amount: float = 0.5) -> void:
+	if not camera_shake:
+		return
+		
+	camera.shake(amount)

@@ -13,6 +13,7 @@ var can_shoot := true
 @onready var color_rect: ColorRect = $ColorRect
 @onready var hurt_box: Area2D = $HurtBox
 
+signal shoot_signal
 signal died
 
 var input_enabled := true
@@ -84,6 +85,9 @@ func _physics_process(delta: float) -> void:
 func shoot() -> void:
 	if projectile_scene == null:
 		return
+	
+	shoot_signal.emit()
+	
 	var proj:Projectile = projectile_scene.instantiate()
 	proj.global_position = shoot_point.global_position
 	proj.color_on = color_on
@@ -94,6 +98,7 @@ func shoot() -> void:
 func take_hit() -> void:
 	if invuln_timer.time_left > 0:
 		return
+		
 	invuln_timer.start()
 	color_rect.modulate = get_hit_color()
 	died.emit()  # GameManager listens and decrements lives
