@@ -4,9 +4,9 @@ extends Node2D
 # --- Spawn configuration ---
 # Each entry: { "position": Vector2, "size": float }
 const BALL_SPAWNS: Array[Dictionary] = [
-	{ "marker": "BallSpawnPoint1", "size": 40.0 },
-	{ "marker": "BallSpawnPoint2", "size": 40.0 },
-	{ "marker": "BallSpawnPoint3", "size": 40.0 },
+	{ "marker": "BallSpawnPoint1", "size": 60.0 },
+	{ "marker": "BallSpawnPoint2", "size": 80.0 },
+	{ "marker": "BallSpawnPoint3", "size": 60.0 },
 ]
 
 @onready var player: Player = $Player
@@ -34,6 +34,7 @@ const BALL_SPAWNS: Array[Dictionary] = [
 @export var sfx_on: bool = false
 @export var bgm_on: bool = false
 @export var camera_shake: bool = false
+@export var voice_over: bool = false
 
 func _ready() -> void:
 	# Connect GameManager
@@ -89,6 +90,8 @@ func _on_debug_toggle_changed(toggle_name: String, value: bool) -> void:
 			bgm_on = value
 		"camera_shake_on":
 			camera_shake = value
+		"voice_over":
+			voice_over = value
 		_:
 			push_warning("Unknown debug toggle: %s" % toggle_name)
 
@@ -117,11 +120,14 @@ func _enter_start() -> void:
 	_freeze_physics(true)
 	_set_player_input(false)
 	
+	_on_voice_over(count)
 	start_timer.start()
 
 var count = 3;
 func on_start_timer_completed() -> void:
+	
 	count -= 1
+	_on_voice_over(count)
 	start_time_label.text = str(count)
 	
 	if count_pop: 
@@ -137,6 +143,23 @@ func on_start_timer_completed() -> void:
 		start_time_label.visible = false;
 		_freeze_physics(false)
 		_set_player_input(true)
+
+
+func _on_voice_over(index) -> void:
+	if not voice_over:
+		return
+		
+	const VOICE_SOUNDS := [
+		preload("res://audio/begin.ogg"),
+		preload("res://audio/1.ogg"),
+		preload("res://audio/2.ogg"),
+		preload("res://audio/3.ogg")
+	]
+	if voice_over:
+		var p := $Audio/AudioStreamPlayer2DC
+		p.stream = VOICE_SOUNDS[index]
+		p.play()
+		
 
 func get_toggle_value(toggle_name: String) -> bool:
 	return debug_menu.toggles_value[toggle_name] or false

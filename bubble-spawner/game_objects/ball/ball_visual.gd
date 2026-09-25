@@ -1,7 +1,7 @@
 class_name BallVisual
 extends Node2D
 
-var radius := 40.0
+var radius := 80.0
 var color := Color(0.2, 0.8, 1.0, 0.25)
 
 func set_radius(r: float) -> void:

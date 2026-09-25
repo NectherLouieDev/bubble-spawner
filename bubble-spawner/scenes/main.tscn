@@ -46,12 +46,16 @@ outline_color = Color(0, 0, 0, 1)
 [sub_resource type="AudioStreamMP3" id="AudioStreamMP3_tbgi4"]
 loop = true
 
+[sub_resource type="AudioStreamOggVorbis" id="AudioStreamOggVorbis_85g3d"]
+
 [node name="Main" type="Node2D" unique_id=491353220]
 script = ExtResource("1_0wfyh")
 
 [node name="Background" type="Sprite2D" parent="." unique_id=687769418]
 z_index = -20
 z_as_relative = false
+position = Vector2(0, 11.499992)
+scale = Vector2(1, 0.764323)
 texture = SubResource("GradientTexture2D_tefeu")
 
 [node name="Ground" type="StaticBody2D" parent="." unique_id=1185583609]
@@ -193,3 +197,6 @@ stream = SubResource("AudioStreamOggVorbis_tefeu")
 
 [node name="AudioStreamPlayer2DBGM" type="AudioStreamPlayer2D" parent="Audio" unique_id=741975890]
 stream = SubResource("AudioStreamMP3_tbgi4")
+
+[node name="AudioStreamPlayer2DC" type="AudioStreamPlayer2D" parent="Audio" unique_id=65703892]
+stream = SubResource("AudioStreamOggVorbis_85g3d")

@@ -18,7 +18,7 @@ const TOGGLES := {
 	10: "sfx_on",
 	11: "bgm_on",
 	12: "camera_shake_on",
-	13: "ui_meta"
+	13: "voice_over"
 }
 
 var toggles_value := {

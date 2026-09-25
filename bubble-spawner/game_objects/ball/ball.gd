@@ -1,8 +1,8 @@
 class_name Ball
 extends CharacterBody2D
 
-@export var size := 40.0            # radius
-@export var min_size := 10.0
+@export var size := 80.0            # radius
+@export var min_size := 5.0
 @export var speed := 150.0
 @export var color := Color(0.2, 0.8, 1.0)
 
